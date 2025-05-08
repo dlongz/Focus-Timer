@@ -2,14 +2,11 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
-  let timeStamp =
-    localStorage.getItem("time_stamp") === null
-      ? 0
-      : parseInt(localStorage.getItem("time_stamp"));
-  let timeStarted =
-    localStorage.getItem("time_started") === null
-      ? false
-      : localStorage.getItem("time_started");
+  let timeStamp = localStorage.getItem("time_stamp")
+      ? parseInt(localStorage.getItem("time_stamp"))
+      : 0;
+  let timeStarted = localStorage.getItem("time_running") === "true"
+  
 
   const [time, setTime] = useState(timeStamp);
   const [started, setStarted] = useState(timeStarted);
@@ -20,25 +17,31 @@ function App() {
         setTime((prev) => prev + 1);
       }, 1000);
 
-      localStorage.setItem("time_stamp", time);
-
       return () => clearInterval(interval);
     }
   }, [started, time]);
 
+  useEffect(() => {
+    localStorage.setItem("time_stamp", time);
+  }, [time])
+  
+  useEffect(() => {
+    localStorage.setItem("time_running", started);
+  },[started])
+
+  useEffect(() => {
+    console.log("Started changed to: "+ started);
+  },[started])
+
   function handleStart() {
     if (!started) {
       setStarted(true);
-      console.log("Started? " + started);
-      localStorage.setItem("time_started", started);
     }
   }
 
   function handlePause() {
     if (started) {
       setStarted(false);
-      console.log("Started? " + started);
-      localStorage.setItem("time_started", started);
     }
   }
 
@@ -46,14 +49,14 @@ function App() {
     setStarted(false);
     setTime(0);
 
-    localStorage.removeItem("time_started");
+    localStorage.removeItem("time_running");
     localStorage.removeItem("time_stamp");
   }
 
-  function formatTime(timez) {
-    let secs = Math.floor(timez % 60);
-    let mins = Math.floor((timez / 60) % 60);
-    let hrs = Math.floor((timez / 60 / 60) % 24);
+  function formatTime(timeInSeconds) {
+    let secs = Math.floor(timeInSeconds % 60);
+    let mins = Math.floor((timeInSeconds / 60) % 60);
+    let hrs = Math.floor((timeInSeconds / 60 / 60) % 24);
 
     secs = secs < 10 ? "0" + secs : secs;
     mins = mins < 10 ? "0" + mins : mins;
